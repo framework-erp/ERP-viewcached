@@ -5,7 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import erp.process.ProcessEntity;
 import erp.repository.Store;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Map;
 import java.util.Set;
@@ -18,9 +17,8 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
 
     private Store<E, ID> underlyingStore;
     private LoadingCache<ID, E> entities;
-    private KafkaTemplate<String, String> kafkaTemplate;
 
-    public ViewCachedStore(Store<E, ID> underlyingStore, KafkaTemplate<String, String> kafkaTemplate) {
+    public ViewCachedStore(Store<E, ID> underlyingStore) {
         entities = CacheBuilder.newBuilder()
                 .build(
                         new CacheLoader<ID, E>() {
@@ -30,10 +28,9 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
                             }
                         });
         this.underlyingStore = underlyingStore;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
-    public ViewCachedStore(Store<E, ID> underlyingStore, KafkaTemplate<String, String> kafkaTemplate, long maximumSize) {
+    public ViewCachedStore(Store<E, ID> underlyingStore, long maximumSize) {
         entities = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .build(
@@ -44,7 +41,6 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
                             }
                         });
         this.underlyingStore = underlyingStore;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -64,21 +60,11 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
     @Override
     public void saveAll(Map<Object, Object> entitiesToInsert, Map<Object, ProcessEntity> entitiesToUpdate) {
         underlyingStore.saveAll(entitiesToInsert, entitiesToUpdate);
-        sendInvalid(entitiesToUpdate.keySet());
     }
 
     @Override
     public void removeAll(Set<Object> ids) {
         underlyingStore.removeAll(ids);
-        sendInvalid(ids);
-    }
-
-    private void sendInvalid(Set<Object> idSet) {
-        if (idSet == null || idSet.isEmpty()) {
-            return;
-        }
-        String processJson = JSON.toJSONString(process, SerializerFeature.IgnoreNonFieldGetter);
-        kafkaTemplate.send("viewcached-invalid-ids", processJson);
     }
 
 }
