@@ -11,10 +11,8 @@ public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
     private Long maximumSize;
 
     public ViewCachedRepository(Repository<E, ID> underlyingRepository) {
+        super(new ViewCachedStore(underlyingRepository.getStore()), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
         this.underlyingRepository = underlyingRepository;
-        entityType = underlyingRepository.getEntityType();
-        store = new ViewCachedStore(underlyingRepository.getStore());
-        mutexes = underlyingRepository.getMutexes();
     }
 
     @Override
