@@ -13,6 +13,7 @@ public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
     public ViewCachedRepository(Repository<E, ID> underlyingRepository) {
         super(new ViewCachedStore(underlyingRepository.getStore()), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
         this.underlyingRepository = underlyingRepository;
+        ViewCached.registerRepository(this);
     }
 
     @Override
@@ -20,4 +21,7 @@ public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
         return underlyingRepository.take(id);
     }
 
+    public void invalidate(E entity) {
+        ((ViewCachedStore) store).invalidate(getId(entity));
+    }
 }

@@ -67,4 +67,8 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
         underlyingStore.removeAll(ids);
     }
 
+    public void invalidate(ID id) {
+        entities.invalidate(id);
+    }
+
 }
