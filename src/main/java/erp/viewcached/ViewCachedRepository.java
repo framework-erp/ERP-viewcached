@@ -8,10 +8,15 @@ import erp.repository.Repository;
 public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
 
     private Repository<E, ID> underlyingRepository;
-    private Long maximumSize;
 
     public ViewCachedRepository(Repository<E, ID> underlyingRepository) {
         super(new ViewCachedStore(underlyingRepository.getStore()), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
+        this.underlyingRepository = underlyingRepository;
+        ViewCachedUpdater.registerRepository(this);
+    }
+
+    public ViewCachedRepository(Repository<E, ID> underlyingRepository, long maximumSize) {
+        super(new ViewCachedStore(underlyingRepository.getStore(), maximumSize), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
         this.underlyingRepository = underlyingRepository;
         ViewCachedUpdater.registerRepository(this);
     }
