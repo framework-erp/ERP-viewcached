@@ -1,6 +1,7 @@
 package erp.viewcached;
 
 import erp.process.definition.json.ProcessJsonUtil;
+import erp.process.definition.json.TypedEntityJson;
 import erp.process.definition.json.TypedEntityUpdateJson;
 
 import java.util.List;
@@ -24,6 +25,20 @@ public abstract class ViewCachedUpdater {
             if (repositories.containsKey(json.getType())) {
                 try {
                     Object entity = parseEntityFromJson(json.getUpdatedEntityJson(), Class.forName(json.getType()));
+                    ViewCachedRepository repository = repositories.get(entity.getClass().getName());
+                    if (repository != null) {
+                        repository.invalidate(entity);
+                    }
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("parseEntityFromJson, get Class for type error", e);
+                }
+            }
+        }
+        List<TypedEntityJson> deletedEntityJsonList = ProcessJsonUtil.getDeletedEntityListJson(processJson);
+        for (TypedEntityJson json : deletedEntityJsonList) {
+            if (repositories.containsKey(json.getType())) {
+                try {
+                    Object entity = parseEntityFromJson(json.getEntityJson(), Class.forName(json.getType()));
                     ViewCachedRepository repository = repositories.get(entity.getClass().getName());
                     if (repository != null) {
                         repository.invalidate(entity);
