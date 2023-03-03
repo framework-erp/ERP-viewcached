@@ -8,7 +8,6 @@ import erp.repository.Store;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author zheng chengdong
@@ -47,8 +46,8 @@ public class ViewCachedStore<E, ID> implements Store<E, ID> {
     public E load(ID id) {
         try {
             return entities.get(id);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("get entity from LoadingCache error", e);
+        } catch (Exception e) {
+            return null;
         }
     }
 
