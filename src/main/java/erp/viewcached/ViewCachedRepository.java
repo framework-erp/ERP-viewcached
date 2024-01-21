@@ -10,13 +10,17 @@ public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
     private Repository<E, ID> underlyingRepository;
 
     public ViewCachedRepository(Repository<E, ID> underlyingRepository) {
-        super(new ViewCachedStore(underlyingRepository.getStore()), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
+        super(underlyingRepository.getEntityType());
+        this.store = new ViewCachedStore(underlyingRepository.getStore());
+        this.mutexes = underlyingRepository.getMutexes();
         this.underlyingRepository = underlyingRepository;
         ViewCachedUpdater.registerRepository(this);
     }
 
     public ViewCachedRepository(Repository<E, ID> underlyingRepository, long maximumSize) {
-        super(new ViewCachedStore(underlyingRepository.getStore(), maximumSize), underlyingRepository.getMutexes(), underlyingRepository.getEntityType());
+        super(underlyingRepository.getEntityType());
+        this.store = new ViewCachedStore(underlyingRepository.getStore(), maximumSize);
+        this.mutexes = underlyingRepository.getMutexes();
         this.underlyingRepository = underlyingRepository;
         ViewCachedUpdater.registerRepository(this);
     }
