@@ -7,7 +7,7 @@ import erp.repository.Repository;
  */
 public class ViewCachedRepository<E, ID> extends Repository<E, ID> {
 
-    private Repository<E, ID> underlyingRepository;
+    protected Repository<E, ID> underlyingRepository;
 
     public ViewCachedRepository(Repository<E, ID> underlyingRepository) {
         super(underlyingRepository.getEntityType());
