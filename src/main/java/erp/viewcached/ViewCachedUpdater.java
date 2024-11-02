@@ -16,16 +16,16 @@ public abstract class ViewCachedUpdater {
     private static Map<String, ViewCachedRepository> repositories = new ConcurrentHashMap<>();
 
     static void registerRepository(ViewCachedRepository repository) {
-        repositories.put(repository.getEntityType(), repository);
+        repositories.put(repository.getName(), repository);
     }
 
     public void updateByProcessJson(String processJson) {
         List<TypedEntityUpdateJson> updateJsonList = ProcessJsonUtil.getEntityUpdateListJson(processJson);
         for (TypedEntityUpdateJson json : updateJsonList) {
-            if (repositories.containsKey(json.getType())) {
+            if (repositories.containsKey(json.getRepositoryName())) {
                 try {
                     Object entity = parseEntityFromJson(json.getUpdatedEntityJson(), Class.forName(json.getType()));
-                    ViewCachedRepository repository = repositories.get(entity.getClass().getName());
+                    ViewCachedRepository repository = repositories.get(json.getRepositoryName());
                     if (repository != null) {
                         repository.invalidate(entity);
                     }
@@ -36,10 +36,10 @@ public abstract class ViewCachedUpdater {
         }
         List<TypedEntityJson> deletedEntityJsonList = ProcessJsonUtil.getDeletedEntityListJson(processJson);
         for (TypedEntityJson json : deletedEntityJsonList) {
-            if (repositories.containsKey(json.getType())) {
+            if (repositories.containsKey(json.getRepositoryName())) {
                 try {
                     Object entity = parseEntityFromJson(json.getEntityJson(), Class.forName(json.getType()));
-                    ViewCachedRepository repository = repositories.get(entity.getClass().getName());
+                    ViewCachedRepository repository = repositories.get(json.getRepositoryName());
                     if (repository != null) {
                         repository.invalidate(entity);
                     }
