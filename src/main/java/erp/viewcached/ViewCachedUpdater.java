@@ -1,8 +1,8 @@
 package erp.viewcached;
 
-import erp.process.definition.json.ProcessJsonUtil;
-import erp.process.definition.json.TypedEntityJson;
-import erp.process.definition.json.TypedEntityUpdateJson;
+import erp.process.definition.Process;
+import erp.process.definition.TypedEntity;
+import erp.process.definition.TypedEntityUpdate;
 
 import java.util.List;
 import java.util.Map;
@@ -20,36 +20,29 @@ public abstract class ViewCachedUpdater {
     }
 
     public void updateByProcessJson(String processJson) {
-        List<TypedEntityUpdateJson> updateJsonList = ProcessJsonUtil.getEntityUpdateListJson(processJson);
-        for (TypedEntityUpdateJson json : updateJsonList) {
-            if (repositories.containsKey(json.getRepositoryName())) {
-                try {
-                    Object entity = parseEntityFromJson(json.getUpdatedEntityJson(), Class.forName(json.getType()));
-                    ViewCachedRepository repository = repositories.get(json.getRepositoryName());
-                    if (repository != null) {
-                        repository.invalidate(entity);
-                    }
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException("parseEntityFromJson, get Class for type error", e);
+        Process process = parseProcessFromJson(processJson);
+        List<TypedEntityUpdate> entityUpdateList = process.getEntityUpdateList();
+        for (TypedEntityUpdate typedEntityUpdate : entityUpdateList) {
+            if (repositories.containsKey(typedEntityUpdate.getRepositoryName())) {
+                Object entity = typedEntityUpdate.getUpdatedEntity();
+                ViewCachedRepository repository = repositories.get(typedEntityUpdate.getRepositoryName());
+                if (repository != null) {
+                    repository.invalidate(entity);
                 }
             }
         }
-        List<TypedEntityJson> deletedEntityJsonList = ProcessJsonUtil.getDeletedEntityListJson(processJson);
-        for (TypedEntityJson json : deletedEntityJsonList) {
-            if (repositories.containsKey(json.getRepositoryName())) {
-                try {
-                    Object entity = parseEntityFromJson(json.getEntityJson(), Class.forName(json.getType()));
-                    ViewCachedRepository repository = repositories.get(json.getRepositoryName());
-                    if (repository != null) {
-                        repository.invalidate(entity);
-                    }
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException("parseEntityFromJson, get Class for type error", e);
+        List<TypedEntity> deletedEntityList = process.getDeletedEntityList();
+        for (TypedEntity typedEntity : deletedEntityList) {
+            if (repositories.containsKey(typedEntity.getRepositoryName())) {
+                Object entity = typedEntity.getEntity();
+                ViewCachedRepository repository = repositories.get(typedEntity.getRepositoryName());
+                if (repository != null) {
+                    repository.invalidate(entity);
                 }
             }
         }
     }
 
-    protected abstract Object parseEntityFromJson(String updatedEntityJson, Class<?> entityClass);
+    protected abstract Process parseProcessFromJson(String processJson);
 
 }
