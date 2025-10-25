@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author zheng chengdong
  */
-public abstract class ViewCachedUpdater {
+public class ViewCachedUpdater {
 
     private static Map<String, ViewCachedRepository> repositories = new ConcurrentHashMap<>();
 
@@ -19,8 +19,7 @@ public abstract class ViewCachedUpdater {
         repositories.put(repository.getName(), repository);
     }
 
-    public void updateByProcessJson(String processJson) {
-        Process process = parseProcessFromJson(processJson);
+    public void updateByProcess(Process process) {
         List<TypedEntityUpdate> entityUpdateList = process.getEntityUpdateList();
         for (TypedEntityUpdate typedEntityUpdate : entityUpdateList) {
             if (repositories.containsKey(typedEntityUpdate.getRepositoryName())) {
@@ -42,7 +41,5 @@ public abstract class ViewCachedUpdater {
             }
         }
     }
-
-    protected abstract Process parseProcessFromJson(String processJson);
 
 }
