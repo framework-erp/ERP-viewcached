@@ -1,6 +1,5 @@
 package erp.viewcached;
 
-import erp.process.definition.Process;
 import erp.process.definition.TypedEntity;
 import erp.process.definition.TypedEntityUpdate;
 
@@ -11,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author zheng chengdong
  */
-public abstract class ViewCachedUpdater {
+public class ViewCachedUpdater {
 
     private static Map<String, ViewCachedRepository> repositories = new ConcurrentHashMap<>();
 
@@ -19,9 +18,8 @@ public abstract class ViewCachedUpdater {
         repositories.put(repository.getName(), repository);
     }
 
-    public void updateByProcessJson(String processJson) {
-        Process process = parseProcessFromJson(processJson);
-        List<TypedEntityUpdate> entityUpdateList = process.getEntityUpdateList();
+    public void updateByProcess(ModifiedEntitiesInProcess modifiedEntities) {
+        List<TypedEntityUpdate> entityUpdateList = modifiedEntities.getEntityUpdateList();
         for (TypedEntityUpdate typedEntityUpdate : entityUpdateList) {
             if (repositories.containsKey(typedEntityUpdate.getRepositoryName())) {
                 Object entity = typedEntityUpdate.getUpdatedEntity();
@@ -31,7 +29,7 @@ public abstract class ViewCachedUpdater {
                 }
             }
         }
-        List<TypedEntity> deletedEntityList = process.getDeletedEntityList();
+        List<TypedEntity> deletedEntityList = modifiedEntities.getDeletedEntityList();
         for (TypedEntity typedEntity : deletedEntityList) {
             if (repositories.containsKey(typedEntity.getRepositoryName())) {
                 Object entity = typedEntity.getEntity();
@@ -42,7 +40,5 @@ public abstract class ViewCachedUpdater {
             }
         }
     }
-
-    protected abstract Process parseProcessFromJson(String processJson);
 
 }
