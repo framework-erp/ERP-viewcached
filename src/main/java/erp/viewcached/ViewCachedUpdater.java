@@ -1,5 +1,6 @@
 package erp.viewcached;
 
+import erp.process.definition.Process;
 import erp.process.definition.TypedEntity;
 import erp.process.definition.TypedEntityUpdate;
 
@@ -18,8 +19,8 @@ public class ViewCachedUpdater {
         repositories.put(repository.getName(), repository);
     }
 
-    public void updateByProcess(ModifiedEntitiesInProcess modifiedEntities) {
-        List<TypedEntityUpdate> entityUpdateList = modifiedEntities.getEntityUpdateList();
+    public void updateByProcess(Process process) {
+        List<TypedEntityUpdate> entityUpdateList = process.getEntityUpdateList();
         for (TypedEntityUpdate typedEntityUpdate : entityUpdateList) {
             if (repositories.containsKey(typedEntityUpdate.getRepositoryName())) {
                 Object entity = typedEntityUpdate.getUpdatedEntity();
@@ -29,7 +30,7 @@ public class ViewCachedUpdater {
                 }
             }
         }
-        List<TypedEntity> deletedEntityList = modifiedEntities.getDeletedEntityList();
+        List<TypedEntity> deletedEntityList = process.getDeletedEntityList();
         for (TypedEntity typedEntity : deletedEntityList) {
             if (repositories.containsKey(typedEntity.getRepositoryName())) {
                 Object entity = typedEntity.getEntity();
